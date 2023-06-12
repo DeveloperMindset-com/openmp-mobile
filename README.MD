@@ -93,7 +93,7 @@ Use [these](https://developer.apple.com/documentation/xcode/adding-package-depen
 In your `Podfile` you can add this library using this syntax:
 
 ```ruby
-pod 'OpenMP', :git => 'https://github.com/eugenehp/openmp-mobile.git', :tag => 'v15.0.6'
+pod 'OpenMP', :git => 'https://github.com/eugenehp/openmp-mobile.git', :tag => 'v16.0.5'
 ```
 
 ### Carthage
@@ -101,7 +101,7 @@ pod 'OpenMP', :git => 'https://github.com/eugenehp/openmp-mobile.git', :tag => '
 In `Cartfile` add following:
 
 ```ruby
-binary "https://raw.githubusercontent.com/eugenehp/openmp-mobile/master/carthage/openmp-static-xcframework.json" ~> 15.0.6
+binary "https://raw.githubusercontent.com/eugenehp/openmp-mobile/master/carthage/openmp-static-xcframework.json" ~> 16.0.5
 ```
 
 ## Releases
