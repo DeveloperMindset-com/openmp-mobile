@@ -1,5 +1,8 @@
 // swift-tools-version:5.5
 import PackageDescription
+
+let version = "16.0.5"
+let checksum = "0388556e23288de9c3df9a1a8242b9415b7a8f91fab6fd2911576ba5e93f7838"
  
 let package = Package(
     name: "OpenMP",
@@ -15,8 +18,8 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "OpenMP",
-            url: “https://github.com/eugenehp/openmp-mobile/releases/download/15.0.6/openmp.xcframework.zip",
-            checksum: "fefbe79b60262dc5400b31d9d06e112f223f2cac9c703b82e474a49557645db7"
+            url: "https://github.com/eugenehp/openmp-mobile/releases/download/\(version)/openmp.xcframework.zip",
+            checksum: checksum
         )
     ]
 )

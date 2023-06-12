@@ -16,13 +16,13 @@ CMAKE_TOOLCHAIN_FILE="$PWD/ios.toolchain.cmake"
 ENABLE_ARC=0
 ENABLE_BITCODE=0
 ENABLE_VISIBILITY=1
-TARGETS=("13.1")
-ARCHS=("Catalyst;arm64")
-PLATFORMS=("MAC_CATALYST_ARM64")
+# TARGETS=("13.1")
+# ARCHS=("Catalyst;arm64")
+# PLATFORMS=("MAC_CATALYST_ARM64")
 
-# TARGETS=("13.0" "13.0" "13.0" "6.0" "6.0" "13.0" "13.0" "13.0")
-# ARCHS=("arm64;arm64e" "arm64;arm64e;x86_64" "arm64;arm64e;x86_64" "armv7k;arm64_32" "i386" "arm64" "x86_64")
-# PLATFORMS=("OS64" "SIMULATOR64" "MAC_UNIVERSAL" "WATCHOS" "SIMULATOR_WATCHOS" "TVOS" "SIMULATOR_TVOS")
+TARGETS=("13.0" "13.0" "13.0" "6.0" "6.0" "13.0" "13.0" "13.0")
+ARCHS=("arm64;arm64e" "arm64;arm64e;x86_64" "arm64;arm64e;x86_64" "armv7k;arm64_32" "i386" "arm64" "x86_64")
+PLATFORMS=("OS64" "SIMULATOR64" "MAC_UNIVERSAL" "WATCHOS" "SIMULATOR_WATCHOS" "TVOS" "SIMULATOR_TVOS")
 
 ROOT=$PWD
 
@@ -31,6 +31,17 @@ function print()
     echo "=============================="
     echo $1
     echo "=============================="
+}
+
+function replace()
+{
+  NUMBER=$1
+  LINE=$2
+  PATH=$3
+  
+  /usr/bin/perl -n -i -e "print unless $. == $NUMBER" $PATH
+  /usr/bin/perl -pi -e "print \"\n\" if $. == $NUMBER" $PATH
+  /usr/bin/perl -pi -e "print '$LINE' if $. == $NUMBER" $PATH
 }
 
 function clear()
@@ -105,7 +116,7 @@ function configure()
         -DLIBOMP_OMPT_SUPPORT=OFF\
         -DLIBOMP_USE_HWLOC=OFF\
         -DLIBOMP_FORTRAN_MODULES=OFF\
-        -DLIBOMP_OMPT_SUPPORT=ON\
+        -DLIBOMP_OMPT_OPTIONAL=ON\
         -DOPENMP_STANDALONE_BUILD=1\
         $EXTRA_FLAGS
 }
@@ -154,29 +165,49 @@ function framework()
     $command
 
     ditto -c -k --sequesterRsrc --keepParent "$FRAMEWORK_OUTPUT" "$FRAMEWORK_OUTPUT.zip"
-    echo $(swift package compute-checksum "$FRAMEWORK_OUTPUT.zip") >> "$FRAMEWORK_OUTPUT.sha256"
     # openssl dgst -sha256 "$XCFRAMEWORK_FOLDER.zip"
+    
+    CHECKSUM=$(swift package compute-checksum "$FRAMEWORK_OUTPUT.zip")
+    echo $CHECKSUM > "$FRAMEWORK_OUTPUT.sha256"
+    echo "$CHECKSUM"
+    update $CHECKSUM
+}
+
+function update()
+{
+    print "Updating the versions in SPM, Cocoapods"
+    CHECKSUM=$1
+
+    # SPM via Package.swift 
+    replace 4 "let version = \"$VERSION\"" "./Package.swift"
+    replace 5 "let checksum = \"$CHECKSUM\"" "./Package.swift"
+    
+    # Cocoapods via OpenMP.podspec
+    replace 2 "  version              = \"$VERSION\"" "./OpenMP.podspec"
+
+    # TODO
+    # add Carthage support
 }
 
 function start()
 {
-    clear
-    download
+    # clear
+    # download
     
-    for index in ${!ARCHS[@]}; do
-        ARCH=${ARCHS[$index]}
-        PLATFORM=${PLATFORMS[$index]}
-        TARGET=${TARGETS[$index]}
+    # for index in ${!ARCHS[@]}; do
+    #     ARCH=${ARCHS[$index]}
+    #     PLATFORM=${PLATFORMS[$index]}
+    #     TARGET=${TARGETS[$index]}
         
-        print "Configuring $NAME for $ARCH on $PLATFORM:$TARGET"
-        configure $ARCH $PLATFORM $TARGET
+    #     print "Configuring $NAME for $ARCH on $PLATFORM:$TARGET"
+    #     configure $ARCH $PLATFORM $TARGET
         
-        print "Building $NAME for $ARCH on $PLATFORM:$TARGET"
-        build $ARCH $PLATFORM
+    #     print "Building $NAME for $ARCH on $PLATFORM:$TARGET"
+    #     build $ARCH $PLATFORM
 
-        print "Installing $NAME for $ARCH on $PLATFORM:$TARGET"
-        install $ARCH $PLATFORM
-    done
+    #     print "Installing $NAME for $ARCH on $PLATFORM:$TARGET"
+    #     install $ARCH $PLATFORM
+    # done
 
     framework
 }

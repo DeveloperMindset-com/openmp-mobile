@@ -1,5 +1,5 @@
 Pod::s.new do |s|
-  version = "16.0.5"
+  version              = "16.0.5"
   s.name               = "OpenMP"
   s.version            = "#{version}"
   s.summary            = "OpenMP library compiled for iOS, Mac, tvOS, watchOS"

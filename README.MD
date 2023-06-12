@@ -104,6 +104,23 @@ In `Cartfile` add following:
 binary "https://raw.githubusercontent.com/eugenehp/openmp-mobile/master/carthage/openmp-static-xcframework.json" ~> 15.0.6
 ```
 
+## Releases
+
+Release management works using [gh](https://cli.github.com/manual/installation).
+
+You'll need to install following:
+
+```shell
+brew install gh
+npm install gh-release
+```
+
+To issue a release use this command:
+
+```shell
+gh-release
+```
+
 ## Contributing
 
 Contributions are welcome, feel free to submit an issue or open a pull request.
