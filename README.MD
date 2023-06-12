@@ -77,6 +77,33 @@ If you're looking to run parallel code on iOS using Objective-C or Swift, make s
 
 If you're not looking to run complex calculations (linear algebra, DSP, neural networks), then you might want to consider Apple's Grand Central Dispatch, as it is more optimized to provide a better user experience (battery management and performance).
 
+## Distribution
+
+This package is available using following pacakge managers.
+
+### Swift Package Manager
+
+`./Pacakage.swift` points to remote release hosted on this GitHub repository.
+Use [these](https://developer.apple.com/documentation/xcode/adding-package-dependencies-to-your-app) instructions to add this GitHub repository.
+
+### Cocoapods
+
+`./OpenMP.podspec` includes all the specific details about the build.
+
+In your `Podfile` you can add this library using this syntax:
+
+```ruby
+pod 'OpenMP', :git => 'https://github.com/eugenehp/openmp-mobile.git', :tag => 'v15.0.6'
+```
+
+### Carthage
+
+In `Cartfile` add following:
+
+```ruby
+binary "https://raw.githubusercontent.com/eugenehp/openmp-mobile/master/carthage/openmp-static-xcframework.json" ~> 15.0.6
+```
+
 ## Contributing
 
 Contributions are welcome, feel free to submit an issue or open a pull request.
@@ -85,7 +112,7 @@ Contributions are welcome, feel free to submit an issue or open a pull request.
 
 [MIT](./LICENSE)
 
-Copyright (c) 2023 [Eugene Hauptmann](http://twitter.com/eugenehp)
+Copyright © 2023 [Eugene Hauptmann](http://twitter.com/eugenehp)
 
 ## Trademarks
 

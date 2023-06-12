@@ -1,7 +1,7 @@
 #!/bin/bash
 # this is part of https://github.com/eugenehp/openmp-mobile
 # MIT License
-# Author: Eugene Hauptmann
+# Author: Eugene Hauptmann eugene@reactivelions.com
 
 set -e
 
@@ -16,13 +16,13 @@ CMAKE_TOOLCHAIN_FILE="$PWD/ios.toolchain.cmake"
 ENABLE_ARC=0
 ENABLE_BITCODE=0
 ENABLE_VISIBILITY=1
-# TARGETS=("13.0")
-# ARCHS=("x86_64")
-# PLATFORMS=("SIMULATOR_TVOS")
+TARGETS=("13.1")
+ARCHS=("Catalyst;arm64")
+PLATFORMS=("MAC_CATALYST_ARM64")
 
-TARGETS=("13.0" "13.0" "13.0" "6.0" "6.0" "13.0" "13.0" "13.0")
-ARCHS=("arm64;arm64e" "arm64;arm64e;x86_64" "arm64;arm64e;x86_64" "armv7k;arm64_32" "i386" "arm64" "x86_64")
-PLATFORMS=("OS64" "SIMULATOR64" "MAC_UNIVERSAL" "WATCHOS" "SIMULATOR_WATCHOS" "TVOS" "SIMULATOR_TVOS")
+# TARGETS=("13.0" "13.0" "13.0" "6.0" "6.0" "13.0" "13.0" "13.0")
+# ARCHS=("arm64;arm64e" "arm64;arm64e;x86_64" "arm64;arm64e;x86_64" "armv7k;arm64_32" "i386" "arm64" "x86_64")
+# PLATFORMS=("OS64" "SIMULATOR64" "MAC_UNIVERSAL" "WATCHOS" "SIMULATOR_WATCHOS" "TVOS" "SIMULATOR_TVOS")
 
 ROOT=$PWD
 
@@ -105,6 +105,7 @@ function configure()
         -DLIBOMP_OMPT_SUPPORT=OFF\
         -DLIBOMP_USE_HWLOC=OFF\
         -DLIBOMP_FORTRAN_MODULES=OFF\
+        -DLIBOMP_OMPT_SUPPORT=ON\
         -DOPENMP_STANDALONE_BUILD=1\
         $EXTRA_FLAGS
 }
