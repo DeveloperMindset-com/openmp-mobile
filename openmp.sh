@@ -215,17 +215,32 @@ function start()
 
 function release()
 {
-    TAG="v$VERSION"
-    CMD="tree $FRAMEWORK_OUTPUT"
-    NOTES="```shell\n$($CMD)\n````"
+    print "Releasing $VERSION"
 
+    TAG="v$VERSION"
+    NOTES="$ROOT/notes.txt"
+
+    cd $FRAMEWORK_OUTPUT
+    cd ../
+    
+    echo "# Release $VERSION" > $NOTES
+    echo "" >> $NOTES
+    echo "\`\`\`shell" >> $NOTES
+    tree "$NAME.xcframework" >> $NOTES
+    echo "\`\`\`" >> $NOTES
+
+    cd $ROOT
+
+    
     gh release create -d \
         -t "$VERSION" \
-        -n $NOTES \
+        -F $NOTES \
         $TAG \
         "$FRAMEWORK_OUTPUT.zip" \
         $CHECKSUM_FILE
     
+    rm $NOTES
+
     gh release view $TAG -w
 }
 
