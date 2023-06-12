@@ -18,7 +18,7 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "OpenMP",
-            url: "https://github.com/eugenehp/openmp-mobile/releases/download/\(version)/openmp.xcframework.zip",
+            url: "https://github.com/eugenehp/openmp-mobile/releases/download/v\(version)/openmp.xcframework.zip"
             checksum: checksum
         )
     ]
