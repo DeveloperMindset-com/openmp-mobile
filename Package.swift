@@ -2,7 +2,7 @@
 import PackageDescription
 
 let version = "16.0.5"
-let checksum = "0388556e23288de9c3df9a1a8242b9415b7a8f91fab6fd2911576ba5e93f7838"
+let checksum = "f67b6b15778ea27e9f1fc2c83977f03688f6d1905c4718eba62530e7ae5c3098"
  
 let package = Package(
     name: "OpenMP",

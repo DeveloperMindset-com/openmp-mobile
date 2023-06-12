@@ -25,6 +25,8 @@ ARCHS=("arm64;arm64e" "arm64;arm64e;x86_64" "arm64;arm64e;x86_64" "armv7k;arm64_
 PLATFORMS=("OS64" "SIMULATOR64" "MAC_UNIVERSAL" "WATCHOS" "SIMULATOR_WATCHOS" "TVOS" "SIMULATOR_TVOS")
 
 ROOT=$PWD
+FRAMEWORK_OUTPUT="$ROOT/$DIST/$NAME.xcframework"
+CHECKSUM_FILE="$FRAMEWORK_OUTPUT.sha256"
 
 function print()
 {
@@ -58,7 +60,7 @@ function download()
     wget "https://github.com/llvm/llvm-project/releases/download/llvmorg-$VERSION/$FILENAME"
     mkdir $NAME
     tar xf $FILENAME --strip-components=1 -C $NAME
-    rm $FILENAME
+    rm "$FILENAME*"
 
     # inspired by
     # https://stackoverflow.com/questions/150355/programmatically-find-the-number-of-cores-on-a-machine
@@ -150,7 +152,6 @@ function framework()
 {
     echo "Preparing framework for $NAME"
 
-    FRAMEWORK_OUTPUT="$ROOT/$DIST/$NAME.xcframework"
     rm -rf $FRAMEWORK_OUTPUT
     mkdir -p $FRAMEWORK_OUTPUT
 
@@ -168,7 +169,7 @@ function framework()
     # openssl dgst -sha256 "$XCFRAMEWORK_FOLDER.zip"
     
     CHECKSUM=$(swift package compute-checksum "$FRAMEWORK_OUTPUT.zip")
-    echo $CHECKSUM > "$FRAMEWORK_OUTPUT.sha256"
+    echo $CHECKSUM > $CHECKSUM_FILE
     echo "$CHECKSUM"
     update $CHECKSUM
 }
@@ -191,25 +192,48 @@ function update()
 
 function start()
 {
-    # clear
-    # download
+    clear
+    download
     
-    # for index in ${!ARCHS[@]}; do
-    #     ARCH=${ARCHS[$index]}
-    #     PLATFORM=${PLATFORMS[$index]}
-    #     TARGET=${TARGETS[$index]}
+    for index in ${!ARCHS[@]}; do
+        ARCH=${ARCHS[$index]}
+        PLATFORM=${PLATFORMS[$index]}
+        TARGET=${TARGETS[$index]}
         
-    #     print "Configuring $NAME for $ARCH on $PLATFORM:$TARGET"
-    #     configure $ARCH $PLATFORM $TARGET
+        print "Configuring $NAME for $ARCH on $PLATFORM:$TARGET"
+        configure $ARCH $PLATFORM $TARGET
         
-    #     print "Building $NAME for $ARCH on $PLATFORM:$TARGET"
-    #     build $ARCH $PLATFORM
+        print "Building $NAME for $ARCH on $PLATFORM:$TARGET"
+        build $ARCH $PLATFORM
 
-    #     print "Installing $NAME for $ARCH on $PLATFORM:$TARGET"
-    #     install $ARCH $PLATFORM
-    # done
+        print "Installing $NAME for $ARCH on $PLATFORM:$TARGET"
+        install $ARCH $PLATFORM
+    done
 
     framework
 }
 
-start
+function release()
+{
+    TAG="v$VERSION"
+    CMD="tree $FRAMEWORK_OUTPUT"
+    NOTES="```shell\n$($CMD)\n````"
+
+    gh release create -d \
+        -t "$VERSION" \
+        -n $NOTES \
+        $TAG \
+        "$FRAMEWORK_OUTPUT.zip" \
+        $CHECKSUM_FILE
+    
+    gh release view $TAG -w
+}
+
+# start
+
+if [ "$1" == "release" ]
+then
+    release
+else
+    start
+fi

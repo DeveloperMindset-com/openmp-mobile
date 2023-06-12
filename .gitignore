@@ -3,5 +3,4 @@ build
 xcframeworks
 *.app
 node_modules
-package.json
 package-lock.json

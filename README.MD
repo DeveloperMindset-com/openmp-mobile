@@ -108,17 +108,14 @@ binary "https://raw.githubusercontent.com/eugenehp/openmp-mobile/master/carthage
 
 Release management works using [gh](https://cli.github.com/manual/installation).
 
-You'll need to install following:
-
 ```shell
-brew install gh
-npm install gh-release
+brew install gh tree
 ```
 
-To issue a release use this command:
+To release a draft:
 
 ```shell
-gh-release
+./openmp.sh release
 ```
 
 ## Contributing
