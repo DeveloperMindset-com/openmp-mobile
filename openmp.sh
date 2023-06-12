@@ -231,6 +231,10 @@ function release()
 
     cd $ROOT
 
+
+    if [ $(git tag -l "v$VERSION") ]; then
+        git tag -d "v$VERSION"
+    fi
     
     gh release create -d \
         -t "$VERSION" \
