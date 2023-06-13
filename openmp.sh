@@ -260,10 +260,9 @@ function release()
     tree "$NAME.xcframework" >> $NOTES
     echo "\`\`\`" >> $NOTES
     echo "" >> $NOTES
-    echo "Checksum - `$CHECKSUM`" >> $NOTES
+    echo "Checksum - \`$CHECKSUM\`" >> $NOTES
 
     cd $ROOT
-
 
     if [ $(git tag -l "v$VERSION") ]; then
         git tag -d "v$VERSION"
