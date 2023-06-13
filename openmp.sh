@@ -12,10 +12,12 @@ BUILD="build"
 BUILD_SHARED_LIBS=OFF
 CMAKE_BUILD_TYPE=Release
 CPU_CORES=$(sysctl -n hw.ncpu)
-CMAKE_TOOLCHAIN_FILE="$PWD/ios.toolchain.cmake"
+CMAKE_TOOLCHAIN_FILE="$PWD/extra/ios.toolchain.cmake"
 ENABLE_ARC=0
 ENABLE_BITCODE=0
 ENABLE_VISIBILITY=1
+NODE=$(which node)
+PARALLEL=OFF # ON|OFF
 # TARGETS=("13.1")
 # ARCHS=("Catalyst;arm64")
 # PLATFORMS=("MAC_CATALYST_ARM64")
@@ -25,6 +27,7 @@ ARCHS=("arm64;arm64e" "arm64;arm64e;x86_64" "arm64;arm64e;x86_64" "armv7k;arm64_
 PLATFORMS=("OS64" "SIMULATOR64" "MAC_UNIVERSAL" "WATCHOS" "SIMULATOR_WATCHOS" "TVOS" "SIMULATOR_TVOS")
 
 ROOT=$PWD
+LOGS="$ROOT/logs"
 FRAMEWORK_OUTPUT="$ROOT/$DIST/$NAME.xcframework"
 CHECKSUM_FILE="$FRAMEWORK_OUTPUT.sha256"
 
@@ -51,6 +54,9 @@ function clear()
     rm -rf "$ROOT/$NAME"
     rm -rf "$ROOT/$BUILD"
     rm -rf "$ROOT/$DIST"
+
+    rm -rf $LOGS
+    mkdir -p $LOGS
 }
 
 function download()
@@ -60,13 +66,14 @@ function download()
     wget "https://github.com/llvm/llvm-project/releases/download/llvmorg-$VERSION/$FILENAME"
     mkdir $NAME
     tar xf $FILENAME --strip-components=1 -C $NAME
-    rm "$FILENAME*"
+    rm -rf "$FILENAME"
+    rm -rf "$FILENAME.*"
 
     # inspired by
     # https://stackoverflow.com/questions/150355/programmatically-find-the-number-of-cores-on-a-machine
     # https://stackoverflow.com/questions/7241936/how-do-i-detect-a-dual-core-cpu-on-ios
     print "Patching z_Linux_util with support for watchOS"
-    patch "$ROOT/$NAME/runtime/src/z_Linux_util.cpp" -i ./z_Linux_util.patch
+    patch "$ROOT/$NAME/runtime/src/z_Linux_util.cpp" -i ./extra/z_Linux_util.patch
 
     print "Downloading ExtendPath.cmake from LLVM"
     # download missing ExtendPath from LLVM, that OpenMP CMake configuration refers to 
@@ -76,8 +83,10 @@ function download()
     cd $ROOT
 
     print "Downloading ios.toolchain.cmake"
+    cd extra
     rm -rf ios.toolchain.cmake
     wget https://raw.githubusercontent.com/leetal/ios-cmake/master/ios.toolchain.cmake
+    cd $ROOT
 
     # from https://www.apple.com/certificateauthority/
     # print "Updating AppleWWDRCA certificate G7"
@@ -95,6 +104,11 @@ function configure()
     OUTPUT="$ROOT/$BUILD/$NAME/install/$PLATFORM"
 
     EXTRA_FLAGS=""
+
+    if [ PLATFORM == "OS64" ] || [ PLATFORM == "SIMULATOR64" ] || [ PLATFORM == "MAC_UNIVERSAL" ]
+    then
+        EXTRA_FLAGS+=" -DLIBOMP_OMPT_SUPPORT=ON"
+    fi
 
     echo "Configuring $NAME for $ARCH in $OUTPUT"
 
@@ -115,10 +129,8 @@ function configure()
         -DDEPLOYMENT_TARGET=$TARGET\
         -DARCHS=$ARCH\
         -DLIBOMP_ENABLE_SHARED=OFF\
-        -DLIBOMP_OMPT_SUPPORT=OFF\
         -DLIBOMP_USE_HWLOC=OFF\
         -DLIBOMP_FORTRAN_MODULES=OFF\
-        -DLIBOMP_OMPT_OPTIONAL=ON\
         -DOPENMP_STANDALONE_BUILD=1\
         $EXTRA_FLAGS
 }
@@ -186,8 +198,28 @@ function update()
     # Cocoapods via OpenMP.podspec
     replace 2 "  version              = \"$VERSION\"" "./OpenMP.podspec"
 
-    # TODO
-    # add Carthage support
+    # Carthage via carthage/openmp-static-xcframework.json
+    $NODE extra/update-carthage.js $VERSION
+}
+
+function single_platform()
+{
+    ARCH=$1
+    PLATFORM=$2
+    TARGET=$3
+
+    print "Preparing single platform: $NAME for $ARCH on $PLATFORM:$TARGET"
+
+    (
+        print "Configuring $NAME for $ARCH on $PLATFORM:$TARGET"
+        configure $ARCH $PLATFORM $TARGET
+        
+        print "Building $NAME for $ARCH on $PLATFORM:$TARGET"
+        build $ARCH $PLATFORM
+
+        print "Installing $NAME for $ARCH on $PLATFORM:$TARGET"
+        install $ARCH $PLATFORM
+    ) >> "$LOGS/$PLATFORM-$TARGET.log"
 }
 
 function start()
@@ -200,14 +232,12 @@ function start()
         PLATFORM=${PLATFORMS[$index]}
         TARGET=${TARGETS[$index]}
         
-        print "Configuring $NAME for $ARCH on $PLATFORM:$TARGET"
-        configure $ARCH $PLATFORM $TARGET
-        
-        print "Building $NAME for $ARCH on $PLATFORM:$TARGET"
-        build $ARCH $PLATFORM
-
-        print "Installing $NAME for $ARCH on $PLATFORM:$TARGET"
-        install $ARCH $PLATFORM
+        if [ $PARALLEL == "ON" ]
+        then
+            single_platform $ARCH $PLATFORM $TARGET & # ampersand enables platfrom runs in parallel
+        else
+            single_platform $ARCH $PLATFORM $TARGET
+        fi
     done
 
     framework
@@ -219,6 +249,7 @@ function release()
 
     TAG="v$VERSION"
     NOTES="$ROOT/notes.txt"
+    CHECKSUM=$(cat $CHECKSUM_FILE)
 
     cd $FRAMEWORK_OUTPUT
     cd ../
@@ -228,6 +259,8 @@ function release()
     echo "\`\`\`shell" >> $NOTES
     tree "$NAME.xcframework" >> $NOTES
     echo "\`\`\`" >> $NOTES
+    echo "" >> $NOTES
+    echo "Checksum - `$CHECKSUM`" >> $NOTES
 
     cd $ROOT
 

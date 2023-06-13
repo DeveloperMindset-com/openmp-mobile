@@ -20,11 +20,17 @@ Latest supported version of OpenMP is [16.0.5](https://github.com/llvm/llvm-proj
 
 ## Requirements
 
-- Xcode
+- Xcode (including multiple `platforms`)
 - LLVM with Clang
 - Homebrew
 - g++
 - CMake
+- node
+- python
+- perl
+- ruby (for Cocoapods)
+- carthage
+- swift
 
 ## Why
 
