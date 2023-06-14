@@ -143,8 +143,6 @@ function build()
     OUTPUT="$ROOT/$BUILD/$NAME/install/$PLATFORM"
 
     cmake --build $BUILD_DIR -j $CPU_CORES
-    # cmake --build $BUILD_DIR -j $CPU_CORES -- CODE_SIGNING_ALLOWED=NO -UseModernBuildSystem=NO
-    # cmake --build $BUILD_DIR -- CODE_SIGNING_ALLOWED=NO -UseModernBuildSystem=NO
 }
 
 function install()

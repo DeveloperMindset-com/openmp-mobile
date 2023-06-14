@@ -99,7 +99,7 @@ If you're not looking to run complex calculations (linear algebra, DSP, neural n
 
 ## Distribution
 
-This package is available using following pacakge managers.
+This package is available using following package managers.
 
 ### Swift Package Manager
 
