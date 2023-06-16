@@ -1,6 +1,5 @@
 const fs = require('fs')
 
-
 if(process.argv.length>2){
   const version = process.argv[2]
   const url = `https://github.com/eugenehp/openmp-mobile/releases/download/v${version}/openmp.xcframework.zip`

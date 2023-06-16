@@ -1,6 +1,6 @@
 # OpenMP Mobile
 
-This library provides means to compile and dsitribute OpenMP library for iOS.
+This library provides means to compile and distribute OpenMP library for iOS.
 
 OpenMP is part of [LLVM](https://github.com/llvm/llvm-project) distribution.
 
