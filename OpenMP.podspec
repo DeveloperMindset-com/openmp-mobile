@@ -1,4 +1,4 @@
-Pod::s.new do |s|
+Pod::Spec.new do |s|
   version              = "16.0.5"
   s.name               = "OpenMP"
   s.version            = "#{version}"
