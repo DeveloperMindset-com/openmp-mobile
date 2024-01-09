@@ -7,7 +7,10 @@ let checksum = "958970064322013ff4fa92ecb0ba53cea4eb3fce41be29498eb645e531f4fe6d
 let package = Package(
     name: "OpenMP",
     platforms: [
-        .macOS(.v13_3), .iOS(.v13), .watchOS(.v6_0), .tvOS(.v6_0)
+        .macOS(.v10_15),
+        .iOS(.v13),
+        .tvOS(.v13),
+        .watchOS(.v6)
     ],
     products: [
         .library(
